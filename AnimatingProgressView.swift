@@ -10,21 +10,23 @@ import UIKit
 
 class AnimatingProgressView: UIProgressView {
 
-    func startProgressing(duration: TimeInterval, completion: @escaping (Void) -> Void) {
+    func startProgressing(duration: TimeInterval, resetProgress: Bool, completion: @escaping (Void) -> Void) {
         stopProgressing()
 
         // Reset to 0
         setProgress(0.0, animated: false)
+        setNeedsLayout()
 
-        // Otherwise the progress doesn't get reset to 0
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: duration, animations: {
-                self.setProgress(1.0, animated: true)
-            }) { finished in
-                guard finished else { return }
+        // Animate the progress
+        UIView.animate(withDuration: duration) {
+            self.setProgress(1.0, animated: true)
+        }
 
-                completion()
-            }
+        // Call the completion after the time is up
+        DispatchQueue.main.asyncAfter(deadline: (DispatchTime.now() + duration)) {
+            if resetProgress { self.progress = 0.0 }
+
+            completion()
         }
     }
 
