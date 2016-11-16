@@ -14,16 +14,20 @@ class AnimatingProgressView: UIProgressView {
         stopProgressing()
 
         // Reset to 0
-        setProgress(0.0, animated: false)
-        setNeedsLayout()
+        progress = 0.0
+        layoutIfNeeded()
+
+        // Set the 'destination' progress
+        progress = 1.0
 
         // Animate the progress
-        UIView.animate(withDuration: duration) {
-            self.setProgress(1.0, animated: true)
-        }
+        UIView.animate(withDuration: duration, animations: {
+            self.layoutIfNeeded()
 
-        // Call the completion after the time is up
-        DispatchQueue.main.asyncAfter(deadline: (DispatchTime.now() + duration)) {
+        }) { finished in
+            // Remove this guard-block, if you want the completion to be called all the time - even when the progression was interrupted
+            guard finished else { return }
+
             if resetProgress { self.progress = 0.0 }
 
             completion()
